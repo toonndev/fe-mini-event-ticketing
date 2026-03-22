@@ -10,6 +10,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { Event } from '../../types';
 import { TicketBadge } from './TicketBadge';
+import { useEventLive } from '../../hooks/useEventLive';
 
 interface EventCardProps {
   event: Event;
@@ -17,7 +18,10 @@ interface EventCardProps {
 }
 
 export const EventCard = ({ event, onClick }: EventCardProps) => {
-  const soldPercent = ((event.totalTickets - event.remainingTickets) / event.totalTickets) * 100;
+  const liveData = useEventLive(event.id);
+  const remainingTickets = liveData?.remainingTickets ?? event.remainingTickets;
+  const ticketStatus = liveData?.status ?? event.status;
+  const soldPercent = ((event.totalTickets - remainingTickets) / event.totalTickets) * 100;
 
   return (
     <Card>
@@ -27,7 +31,7 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
             <Typography variant="h6" sx={{ flex: 1, mr: 1 }}>
               {event.name}
             </Typography>
-            <TicketBadge status={event.status} remainingTickets={event.remainingTickets} />
+            <TicketBadge status={ticketStatus} remainingTickets={remainingTickets} />
           </Box>
 
           <Typography
@@ -68,13 +72,13 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
                 Tickets remaining
               </Typography>
               <Typography variant="caption" fontWeight={500}>
-                {event.remainingTickets} / {event.totalTickets}
+                {remainingTickets} / {event.totalTickets}
               </Typography>
             </Box>
             <LinearProgress
               variant="determinate"
               value={soldPercent}
-              color={event.status === 'sold_out' ? 'error' : event.status === 'almost_full' ? 'warning' : 'success'}
+              color={ticketStatus === 'sold_out' ? 'error' : ticketStatus === 'almost_full' ? 'warning' : 'success'}
               sx={{ borderRadius: 4, height: 6 }}
             />
           </Box>

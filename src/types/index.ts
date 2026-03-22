@@ -1,7 +1,10 @@
+export type UserRole = 'user' | 'admin';
+
 export interface User {
   id: string;
   name: string;
   email: string;
+  role: UserRole;
 }
 
 export type TicketStatus = 'available' | 'almost_full' | 'sold_out';
@@ -30,4 +33,12 @@ export interface Booking {
 export interface AuthResponse {
   token: string;
   user: User;
+}
+
+export interface CreateEventPayload {
+  name: string;
+  description: string;
+  date: string;
+  venue: string;
+  totalTickets: number;
 }

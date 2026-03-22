@@ -12,6 +12,7 @@ export const useEvents = () => {
     setError(null);
     try {
       const data = await getEvents();
+      console.log("getEvents =>", data);
       setEvents(data);
     } catch {
       setError('Failed to load events');
@@ -37,6 +38,7 @@ export const useEvent = (id: string) => {
     setError(null);
     try {
       const data = await getEventById(id);
+      console.log("data=>", data);
       setEvent(data);
     } catch {
       setError('Failed to load event');

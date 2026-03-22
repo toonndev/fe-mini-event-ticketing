@@ -18,6 +18,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useEvent } from '../hooks/useEvents';
 import { useBookings } from '../hooks/useBookings';
+import { useEventLive } from '../hooks/useEventLive';
 import { BookingForm } from '../components/bookings/BookingForm';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { TicketBadge } from '../components/events/TicketBadge';
@@ -26,9 +27,13 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 export const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { event, loading, error, refetch } = useEvent(id!);
-  const { bookings, loading: bookingsLoading } = useBookings();
+  const { event, loading, error } = useEvent(id!);
+  const { bookings, loading: bookingsLoading, refetch: refetchBookings } = useBookings();
+  const liveData = useEventLive(id);
   const [snackOpen, setSnackOpen] = useState(false);
+
+  const remainingTickets = liveData?.remainingTickets ?? event?.remainingTickets ?? 0;
+  const ticketStatus = liveData?.status ?? event?.status ?? 'available';
 
   const usedQuota = bookings.filter((b) => b.eventId === id).reduce((sum, b) => sum + b.quantity, 0);
 
@@ -38,12 +43,12 @@ export const EventDetailPage = () => {
   }, [bookingsLoading]);
 
   const soldPercent = event
-    ? ((event.totalTickets - event.remainingTickets) / event.totalTickets) * 100
+    ? ((event.totalTickets - remainingTickets) / event.totalTickets) * 100
     : 0;
 
   const handleBookingSuccess = () => {
     setSnackOpen(true);
-    refetch();
+    refetchBookings();
   };
 
   if (error) return <Container sx={{ py: 4 }}><ErrorAlert message={error} onRetry={refetch} /></Container>;
@@ -72,7 +77,7 @@ export const EventDetailPage = () => {
             <>
               <Box display="flex" alignItems="center" gap={2} mb={2}>
                 <Typography variant="h5">{event.name}</Typography>
-                <TicketBadge status={event.status} remainingTickets={event.remainingTickets} />
+                <TicketBadge status={ticketStatus} remainingTickets={remainingTickets} />
               </Box>
 
               <Typography variant="body1" color="text.secondary" mb={3}>
@@ -105,20 +110,20 @@ export const EventDetailPage = () => {
                     Tickets remaining
                   </Typography>
                   <Typography variant="body2" fontWeight={500}>
-                    {event.remainingTickets} / {event.totalTickets}
+                    {remainingTickets} / {event.totalTickets}
                   </Typography>
                 </Box>
                 <LinearProgress
                   variant="determinate"
                   value={soldPercent}
-                  color={event.status === 'sold_out' ? 'error' : event.status === 'almost_full' ? 'warning' : 'success'}
+                  color={ticketStatus === 'sold_out' ? 'error' : ticketStatus === 'almost_full' ? 'warning' : 'success'}
                   sx={{ borderRadius: 4, height: 8 }}
                 />
               </Box>
 
               <Box mt={3} display="flex" gap={1} flexWrap="wrap">
                 <Chip label={`${event.totalTickets} total capacity`} variant="outlined" size="small" />
-                <Chip label={`${event.remainingTickets} remaining`} variant="outlined" size="small" />
+                <Chip label={`${remainingTickets} remaining`} variant="outlined" size="small" />
               </Box>
             </>
           ) : null}
@@ -138,7 +143,7 @@ export const EventDetailPage = () => {
           ) : event ? (
             <BookingForm
               eventId={event.id}
-              remainingTickets={event.remainingTickets}
+              remainingTickets={remainingTickets}
               usedQuota={usedQuota}
               onSuccess={handleBookingSuccess}
             />

@@ -6,7 +6,7 @@ import { useBookings } from '../hooks/useBookings';
 import { BookingList } from '../components/bookings/BookingList';
 
 export const DashboardPage = () => {
-  const { bookings, loading, error } = useBookings();
+  const { bookings, loading, error, refetch } = useBookings();
 
   const totalTickets = bookings.reduce((sum, b) => sum + b.quantity, 0);
   const uniqueEvents = new Set(bookings.map((b) => b.eventId)).size;
@@ -57,7 +57,7 @@ export const DashboardPage = () => {
       {error ? (
         <Typography color="error">{error}</Typography>
       ) : (
-        <BookingList bookings={bookings} loading={loading} />
+        <BookingList bookings={bookings} loading={loading} onCancelled={refetch} />
       )}
     </Container>
   );

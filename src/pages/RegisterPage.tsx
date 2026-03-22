@@ -56,7 +56,7 @@ export const RegisterPage = () => {
     <Container maxWidth="xs" sx={{ mt: 10 }}>
       <Paper sx={{ p: 4 }}>
         <Typography variant="h5" align="center" gutterBottom>
-          Ticketly
+          Mini Event Ticketing System
         </Typography>
         <Typography variant="subtitle2" align="center" mb={3}>
           Create your account
