@@ -51,7 +51,7 @@ export const EventDetailPage = () => {
     refetchBookings();
   };
 
-  if (error) return <Container sx={{ py: 4 }}><ErrorAlert message={error} onRetry={refetch} /></Container>;
+  if (error) return <Container sx={{ py: 4 }}><ErrorAlert message={error} /></Container>;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>

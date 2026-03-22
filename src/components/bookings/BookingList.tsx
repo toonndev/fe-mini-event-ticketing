@@ -57,9 +57,9 @@ export const BookingList = ({ bookings, loading, onCancelled }: BookingListProps
             </TableRow>
           </TableHead>
           <TableBody>
-            {[...Array(3)].map((_, i) => (
+            {[...new Array(3)].map((_, i) => (
               <TableRow key={i}>
-                {[...Array(5)].map((__, j) => (
+                {[...new Array(5)].map((__, j) => (
                   <TableCell key={j}>
                     <Skeleton variant="text" />
                   </TableCell>

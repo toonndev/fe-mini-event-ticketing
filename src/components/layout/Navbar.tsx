@@ -19,8 +19,6 @@ export const Navbar = () => {
   const { pathname } = useLocation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const isAdmin = user?.role === 'admin';
-
   const navLinks = [
     { label: 'Events', path: '/' },
     { label: 'My Tickets', path: '/dashboard' },

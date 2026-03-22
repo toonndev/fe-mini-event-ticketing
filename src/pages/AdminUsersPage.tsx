@@ -87,9 +87,9 @@ export const AdminUsersPage = () => {
           </TableHead>
           <TableBody>
             {loading
-              ? [...Array(4)].map((_, i) => (
+              ? [...new Array(4)].map((_, i) => (
                   <TableRow key={i}>
-                    {[...Array(4)].map((__, j) => (
+                    {[...new Array(4)].map((__, j) => (
                       <TableCell key={j}>
                         <Skeleton variant="text" />
                       </TableCell>

@@ -22,7 +22,7 @@ export const EventListPage = () => {
 
       <Grid container spacing={3}>
         {loading
-          ? [...Array(3)].map((_, i) => (
+          ? [...new Array(3)].map((_, i) => (
               <Grid item xs={12} sm={6} md={4} key={i}>
                 <EventCardSkeleton />
               </Grid>
