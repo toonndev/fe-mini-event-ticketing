@@ -2,6 +2,7 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  CardMedia,
   Typography,
   Box,
   LinearProgress,
@@ -12,6 +13,14 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { Event } from '../../types';
 import { TicketBadge } from './TicketBadge';
 import { useEventLive } from '../../hooks/useEventLive';
+
+const PLACEHOLDER_GRADIENTS = [
+  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+];
 
 interface EventCardProps {
   event: Event;
@@ -29,9 +38,52 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
     ? `฿${event.ticketPrice.toLocaleString()}`
     : 'Free';
 
+  // deterministic placeholder based on event id char sum
+  const placeholderIndex =
+    event.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) %
+    PLACEHOLDER_GRADIENTS.length;
+
   return (
     <Card sx={{ opacity: isPast ? 0.6 : 1 }}>
       <CardActionArea onClick={() => !isPast && onClick(event.id)} disabled={isPast}>
+        {/* Image / placeholder */}
+        {event.imageUrl ? (
+          <CardMedia
+            component="img"
+            height="160"
+            image={event.imageUrl}
+            alt={event.name}
+            sx={{ objectFit: 'cover' }}
+          />
+        ) : (
+          <Box
+            sx={{
+              height: 160,
+              background: PLACEHOLDER_GRADIENTS[placeholderIndex],
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'rgba(255,255,255,0.85)',
+                fontWeight: 700,
+                textAlign: 'center',
+                px: 2,
+                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {event.name}
+            </Typography>
+          </Box>
+        )}
+
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
             <Box display="flex" alignItems="center" gap={1} sx={{ flex: 1, mr: 1 }}>
