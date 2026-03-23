@@ -63,6 +63,10 @@ export const EventListPage = () => {
 
   const isFiltering = debouncedSearch !== '' || category !== 'all';
 
+  const now = new Date();
+  const upcomingEvents = events.filter((e) => new Date(e.endDate ?? e.date) >= now);
+  const pastEvents = events.filter((e) => new Date(e.endDate ?? e.date) < now);
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Hero Slider */}
@@ -135,7 +139,7 @@ export const EventListPage = () => {
 
       {error && <ErrorAlert message={error} onRetry={refetch} />}
 
-      {/* Event grid */}
+      {/* Upcoming events grid */}
       <Grid container spacing={3}>
         {loading
           ? [...new Array(ITEMS_PER_PAGE)].map((_, i) => (
@@ -143,7 +147,7 @@ export const EventListPage = () => {
                 <EventCardSkeleton />
               </Grid>
             ))
-          : events.length === 0
+          : upcomingEvents.length === 0 && pastEvents.length === 0
           ? (
               <Grid item xs={12}>
                 <Box textAlign="center" py={8}>
@@ -151,7 +155,7 @@ export const EventListPage = () => {
                 </Box>
               </Grid>
             )
-          : events.map((event) => (
+          : upcomingEvents.map((event) => (
               <Grid item xs={12} sm={6} md={4} key={event.id}>
                 <EventCard event={event} onClick={(id) => navigate(`/events/${id}`)} />
               </Grid>
@@ -171,6 +175,23 @@ export const EventListPage = () => {
             color="primary"
             shape="rounded"
           />
+        </Box>
+      )}
+
+      {/* Past events */}
+      {!loading && pastEvents.length > 0 && (
+        <Box mt={6}>
+          <Divider sx={{ mb: 3 }} />
+          <Typography variant="h5" fontWeight={600} mb={3} color="text.secondary">
+            Past Events
+          </Typography>
+          <Grid container spacing={3}>
+            {pastEvents.map((event) => (
+              <Grid item xs={12} sm={6} md={4} key={event.id}>
+                <EventCard event={event} onClick={(id) => navigate(`/events/${id}`)} />
+              </Grid>
+            ))}
+          </Grid>
         </Box>
       )}
     </Container>

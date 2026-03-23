@@ -14,9 +14,11 @@ import {
   InputLabel,
   FormHelperText,
 } from '@mui/material';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useEvent } from '../hooks/useEvents';
@@ -34,10 +36,7 @@ const schema = z
     date: z
       .string()
       .min(1, 'Required')
-      .refine((val) => {
-        const localDate = new Date(val + ':00');
-        return localDate.getTime() > Date.now();
-      }, 'Event date must be in the future'),
+      .refine((val) => new Date(val).getTime() > Date.now(), 'Event date must be in the future'),
     endDate: z.string().optional(),
     venue: z.string().min(1, 'Required'),
     totalTickets: z
@@ -67,12 +66,6 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>;
 
-const toLocalDatetimeString = (iso: string): string => {
-  const d = new Date(iso);
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
-};
 
 export const EditEventPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -95,8 +88,8 @@ export const EditEventPage = () => {
     reset({
       name: event.name,
       description: event.description,
-      date: toLocalDatetimeString(event.date),
-      endDate: event.endDate ? toLocalDatetimeString(event.endDate) : '',
+      date: event.date,
+      endDate: event.endDate ?? '',
       venue: event.venue,
       totalTickets: event.totalTickets,
       category: event.category,
@@ -133,10 +126,6 @@ export const EditEventPage = () => {
       setApiError('Failed to update event. Please try again.');
     }
   };
-
-  const localMin = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
@@ -215,28 +204,49 @@ export const EditEventPage = () => {
               {errors.category && <FormHelperText>{errors.category.message}</FormHelperText>}
             </FormControl>
 
-            <TextField
-              label="Date & Time"
-              type="datetime-local"
-              fullWidth
-              margin="normal"
-              disabled={!isAdmin}
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ min: localMin }}
-              error={!!errors.date}
-              helperText={errors.date?.message}
-              {...register('date')}
+            <Controller
+              name="date"
+              control={control}
+              render={({ field }) => (
+                <DateTimePicker
+                  label="Date & Time"
+                  value={field.value ? dayjs(field.value) : null}
+                  onChange={(val) => field.onChange(val ? val.toISOString() : '')}
+                  disabled={!isAdmin}
+                  closeOnSelect={false}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      margin: 'normal',
+                      error: !!errors.date,
+                      helperText: errors.date?.message,
+                    },
+                    actionBar: { actions: ['cancel', 'accept'] },
+                  }}
+                />
+              )}
             />
-            <TextField
-              label="End Date & Time (optional)"
-              type="datetime-local"
-              fullWidth
-              margin="normal"
-              disabled={!isAdmin}
-              InputLabelProps={{ shrink: true }}
-              error={!!errors.endDate}
-              helperText={errors.endDate?.message}
-              {...register('endDate')}
+            <Controller
+              name="endDate"
+              control={control}
+              render={({ field }) => (
+                <DateTimePicker
+                  label="End Date & Time (optional)"
+                  value={field.value ? dayjs(field.value) : null}
+                  onChange={(val) => field.onChange(val ? val.toISOString() : '')}
+                  disabled={!isAdmin}
+                  closeOnSelect={false}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      margin: 'normal',
+                      error: !!errors.endDate,
+                      helperText: errors.endDate?.message,
+                    },
+                    actionBar: { actions: ['cancel', 'accept'] },
+                  }}
+                />
+              )}
             />
             <TextField
               label="Location"
