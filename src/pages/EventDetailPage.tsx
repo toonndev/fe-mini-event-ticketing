@@ -19,9 +19,18 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableContainer,
+  Paper,
 } from '@mui/material';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { EventBooking } from '../types';
+import { getEventBookings } from '../api/adminApi';
 import { useEvent } from '../hooks/useEvents';
 import { useBookings } from '../hooks/useBookings';
 import { useEventLive } from '../hooks/useEventLive';
@@ -32,6 +41,7 @@ import { TicketBadge } from '../components/events/TicketBadge';
 import { deleteEvent } from '../api/eventApi';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -46,9 +56,26 @@ export const EventDetailPage = () => {
   const [snackOpen, setSnackOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [buyers, setBuyers] = useState<EventBooking[]>([]);
+  const [buyersLoading, setBuyersLoading] = useState(false);
+
+  const fetchBuyers = useCallback(async () => {
+    if (!id || !isAdmin) return;
+    setBuyersLoading(true);
+    try {
+      const data = await getEventBookings(id);
+      setBuyers(data);
+    } finally {
+      setBuyersLoading(false);
+    }
+  }, [id, isAdmin]);
+
+  useEffect(() => {
+    fetchBuyers();
+  }, [fetchBuyers]);
 
   const remainingTickets = liveData?.remainingTickets ?? event?.remainingTickets ?? 0;
-  const ticketStatus = liveData?.status ?? event?.status ?? 'available';
+  const ticketStatus = liveData?.ticketStatus ?? event?.ticketStatus ?? 'available';
 
   const usedQuota = bookings.filter((b) => b.eventId === id).reduce((sum, b) => sum + b.quantity, 0);
 
@@ -66,6 +93,7 @@ export const EventDetailPage = () => {
   const handleBookingSuccess = () => {
     setSnackOpen(true);
     refetchBookings();
+    fetchBuyers();
   };
 
   const handleDelete = async () => {
@@ -95,6 +123,7 @@ export const EventDetailPage = () => {
         <Grid item xs={12} md={8}>
           {loading ? (
             <Box>
+              <Skeleton variant="rectangular" width="100%" height={240} sx={{ mb: 2, borderRadius: 2 }} />
               <Skeleton variant="text" width="70%" height={40} />
               <Skeleton variant="rounded" width={100} height={24} sx={{ mb: 2 }} />
               <Skeleton variant="text" width="100%" />
@@ -103,6 +132,21 @@ export const EventDetailPage = () => {
             </Box>
           ) : event ? (
             <>
+              {event.imageUrl && (
+                <Box
+                  component="img"
+                  src={event.imageUrl}
+                  alt={event.name}
+                  sx={{
+                    width: '100%',
+                    maxHeight: 300,
+                    objectFit: 'cover',
+                    borderRadius: 2,
+                    mb: 3,
+                  }}
+                />
+              )}
+
               <Box display="flex" alignItems="center" gap={2} mb={2} flexWrap="wrap">
                 <Typography variant="h5" sx={{ flex: 1 }}>{event.name}</Typography>
                 <TicketBadge status={ticketStatus} remainingTickets={remainingTickets} />
@@ -147,10 +191,43 @@ export const EventDetailPage = () => {
                     })}
                   </Typography>
                 </Box>
+                {event.endDate && (
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <CalendarMonthIcon color="action" fontSize="small" />
+                    <Typography variant="body2" color="text.secondary">
+                      Ends:{' '}
+                      {new Date(event.endDate).toLocaleDateString('th-TH', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </Typography>
+                  </Box>
+                )}
                 <Box display="flex" alignItems="center" gap={1}>
                   <LocationOnIcon color="action" fontSize="small" />
                   <Typography variant="body2">{event.venue}</Typography>
                 </Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <LocalOfferIcon color="action" fontSize="small" />
+                  <Typography variant="body2">
+                    {event.ticketPrice > 0 ? `฿${event.ticketPrice.toLocaleString()}` : 'Free'}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box display="flex" alignItems="center" gap={1} mb={3} flexWrap="wrap">
+                <Chip
+                  label={event.category}
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                  sx={{ textTransform: 'capitalize' }}
+                />
+                {event.tags && event.tags.length > 0 && event.tags.map((tag) => (
+                  <Chip key={tag} label={tag} size="small" variant="outlined" />
+                ))}
               </Box>
 
               <Box>
@@ -195,11 +272,71 @@ export const EventDetailPage = () => {
               remainingTickets={remainingTickets}
               usedQuota={usedQuota}
               isPast={isPast}
+              maxTicketsPerUser={event.maxTicketsPerUser ?? 5}
               onSuccess={handleBookingSuccess}
             />
           ) : null}
         </Grid>
       </Grid>
+
+      {isAdmin && (
+        <Box mt={5}>
+          <Divider sx={{ mb: 3 }} />
+          <Typography variant="h6" mb={2}>
+            Buyers ({buyers.reduce((sum, b) => sum + b.quantity, 0)} tickets sold)
+          </Typography>
+          <TableContainer component={Paper} variant="outlined">
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell align="center">Qty</TableCell>
+                  <TableCell>Booked at</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {buyersLoading
+                  ? [...new Array(3)].map((_, i) => (
+                      <TableRow key={i}>
+                        {[...new Array(4)].map((__, j) => (
+                          <TableCell key={j}><Skeleton variant="text" /></TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  : buyers.length === 0
+                  ? (
+                      <TableRow>
+                        <TableCell colSpan={4} align="center">
+                          <Typography variant="body2" color="text.secondary" py={2}>
+                            No bookings yet
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  : buyers.map((b) => (
+                      <TableRow key={b.bookingId} hover>
+                        <TableCell>{b.user.name}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {b.user.email}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">{b.quantity}</TableCell>
+                        <TableCell>
+                          {new Date(b.bookedAt).toLocaleDateString('th-TH', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      )}
 
       <Dialog open={deleteOpen} onClose={() => !deleting && setDeleteOpen(false)}>
         <DialogTitle>Delete event?</DialogTitle>

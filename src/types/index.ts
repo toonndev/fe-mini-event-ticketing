@@ -7,6 +7,10 @@ export interface User {
   role: UserRole;
 }
 
+export type EventCategory = 'concert' | 'conference' | 'sport' | 'workshop' | 'festival' | 'exhibition' | 'other';
+
+export type EventStatus = 'draft' | 'published' | 'cancelled';
+
 export type TicketStatus = 'available' | 'almost_full' | 'sold_out';
 
 export interface Event {
@@ -14,10 +18,17 @@ export interface Event {
   name: string;
   description: string;
   date: string;
+  endDate: string | null;
   venue: string;
   totalTickets: number;
   remainingTickets: number;
-  status: TicketStatus;
+  ticketPrice: number;
+  category: EventCategory;
+  imageUrl: string | null;
+  maxTicketsPerUser: number;
+  tags: string[] | null;
+  status: EventStatus;
+  ticketStatus: TicketStatus;
 }
 
 export interface Booking {
@@ -28,6 +39,17 @@ export interface Booking {
   venue: string;
   quantity: number;
   bookedAt: string;
+}
+
+export interface EventBooking {
+  bookingId: string;
+  quantity: number;
+  bookedAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 export interface AuthResponse {
@@ -41,12 +63,26 @@ export interface CreateEventPayload {
   date: string;
   venue: string;
   totalTickets: number;
+  category: EventCategory;
+  endDate?: string;
+  ticketPrice?: number;
+  imageUrl?: string;
+  maxTicketsPerUser?: number;
+  status?: EventStatus;
+  tags?: string[];
 }
 
 export interface UpdateEventPayload {
   name?: string;
   description?: string;
   date?: string;
+  endDate?: string;
   venue?: string;
   totalTickets?: number;
+  ticketPrice?: number;
+  category?: EventCategory;
+  imageUrl?: string;
+  maxTicketsPerUser?: number;
+  status?: EventStatus;
+  tags?: string[];
 }

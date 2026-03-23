@@ -3,7 +3,7 @@ import { TicketStatus } from '../types';
 
 interface LiveTicketData {
   remainingTickets: number;
-  status: TicketStatus;
+  ticketStatus: TicketStatus;
 }
 
 export const useEventLive = (eventId: string | undefined) => {

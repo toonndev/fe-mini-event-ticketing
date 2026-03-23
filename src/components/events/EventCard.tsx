@@ -5,6 +5,7 @@ import {
   Typography,
   Box,
   LinearProgress,
+  Chip,
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -20,9 +21,13 @@ interface EventCardProps {
 export const EventCard = ({ event, onClick }: EventCardProps) => {
   const liveData = useEventLive(event.id);
   const remainingTickets = liveData?.remainingTickets ?? event.remainingTickets;
-  const ticketStatus = liveData?.status ?? event.status;
+  const ticketStatus = liveData?.ticketStatus ?? event.ticketStatus;
   const soldPercent = ((event.totalTickets - remainingTickets) / event.totalTickets) * 100;
   const isPast = new Date(event.date) < new Date();
+
+  const priceLabel = event.ticketPrice > 0
+    ? `฿${event.ticketPrice.toLocaleString()}`
+    : 'Free';
 
   return (
     <Card sx={{ opacity: isPast ? 0.6 : 1 }}>
@@ -67,11 +72,16 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
             </Typography>
           </Box>
 
-          <Box display="flex" alignItems="center" gap={0.5} mb={2}>
+          <Box display="flex" alignItems="center" gap={0.5} mb={1}>
             <LocationOnIcon fontSize="small" color="action" />
             <Typography variant="caption" color="text.secondary">
               {event.venue}
             </Typography>
+          </Box>
+
+          <Box display="flex" alignItems="center" gap={1} mb={2}>
+            <Chip label={event.category} size="small" variant="outlined" sx={{ textTransform: 'capitalize' }} />
+            <Chip label={priceLabel} size="small" color={event.ticketPrice > 0 ? 'default' : 'success'} variant="outlined" />
           </Box>
 
           <Box>

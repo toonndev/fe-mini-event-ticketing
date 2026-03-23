@@ -29,3 +29,8 @@ export const updateEvent = async (id: string, payload: UpdateEventPayload): Prom
 export const deleteEvent = async (id: string): Promise<void> => {
   await axiosClient.delete(`/events/${id}`);
 };
+
+export const getCategories = async (): Promise<string[]> => {
+  const { data } = await axiosClient.get<string[]>('/events/categories');
+  return data;
+};
