@@ -178,7 +178,7 @@ export const AdminEventsPage = () => {
                 </TableRow>
               ) : (
                 events.map((event) => {
-                  const isPast = new Date(event.date) < new Date();
+                  const isPast = new Date(event.endDate ?? event.date) < new Date();
                   return (
                     <TableRow key={event.id} hover>
                       {/* Event name + thumbnail */}

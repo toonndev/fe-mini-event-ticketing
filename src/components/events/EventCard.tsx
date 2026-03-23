@@ -32,7 +32,7 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
   const remainingTickets = liveData?.remainingTickets ?? event.remainingTickets;
   const ticketStatus = liveData?.ticketStatus ?? event.ticketStatus;
   const soldPercent = ((event.totalTickets - remainingTickets) / event.totalTickets) * 100;
-  const isPast = new Date(event.date) < new Date();
+  const isPast = new Date(event.endDate ?? event.date) < new Date();
 
   const priceLabel = event.ticketPrice > 0
     ? `฿${event.ticketPrice.toLocaleString()}`
