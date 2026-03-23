@@ -22,9 +22,8 @@ export const Navbar = () => {
   const navLinks = [
     { label: 'Events', path: '/', adminOnly: false },
     { label: 'My Tickets', path: '/dashboard', adminOnly: false },
-    { label: 'จัดการ Events', path: '/admin/events', adminOnly: true },
-    { label: 'สร้าง Event', path: '/admin/events/create', adminOnly: true },
-    { label: 'Users', path: '/admin/users', adminOnly: true },
+    { label: 'Events Management', path: '/admin/events', adminOnly: true },
+    { label: 'Users Management', path: '/admin/users', adminOnly: true },
   ].filter((link) => !link.adminOnly || user?.role === 'admin');
 
   return (
