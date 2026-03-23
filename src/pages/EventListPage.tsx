@@ -147,11 +147,19 @@ export const EventListPage = () => {
                 <EventCardSkeleton />
               </Grid>
             ))
-          : upcomingEvents.length === 0 && pastEvents.length === 0
+          : events.length === 0
           ? (
               <Grid item xs={12}>
                 <Box textAlign="center" py={8}>
                   <Typography color="text.secondary">ไม่พบ event ที่ตรงกับการค้นหา</Typography>
+                </Box>
+              </Grid>
+            )
+          : upcomingEvents.length === 0
+          ? (
+              <Grid item xs={12}>
+                <Box textAlign="center" py={4}>
+                  <Typography color="text.secondary">ไม่มี upcoming events ในขณะนี้</Typography>
                 </Box>
               </Grid>
             )
