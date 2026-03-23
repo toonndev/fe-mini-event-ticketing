@@ -65,7 +65,7 @@ export const Footer = () => {
               ข้อมูล
             </Typography>
             <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="body2">ติดต่อ: support@ticketing.dev</Typography>
+              <Typography variant="body2">ติดต่อ: support@goevent.dev</Typography>
               <Typography variant="body2">เปิดให้บริการ 24/7</Typography>
             </Box>
           </Box>
@@ -81,10 +81,7 @@ export const Footer = () => {
           gap={1}
         >
           <Typography variant="caption">
-            © {year} Mini Event Ticketing System. All rights reserved.
-          </Typography>
-          <Typography variant="caption">
-            Built with React + MUI
+            © {year} GoEvent. All rights reserved.
           </Typography>
         </Box>
       </Container>

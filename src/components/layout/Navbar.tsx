@@ -20,11 +20,12 @@ export const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const navLinks = [
-    { label: 'Events', path: '/' },
-    { label: 'My Tickets', path: '/dashboard' },
-    { label: 'Create Event', path: '/admin/events/create' },
-    { label: 'Users', path: '/admin/users' },
-  ];
+    { label: 'Events', path: '/', adminOnly: false },
+    { label: 'My Tickets', path: '/dashboard', adminOnly: false },
+    { label: 'จัดการ Events', path: '/admin/events', adminOnly: true },
+    { label: 'สร้าง Event', path: '/admin/events/create', adminOnly: true },
+    { label: 'Users', path: '/admin/users', adminOnly: true },
+  ].filter((link) => !link.adminOnly || user?.role === 'admin');
 
   return (
     <AppBar position="sticky" elevation={0} sx={{ borderBottom: '1px solid #e2e8f0' }}>
@@ -35,7 +36,7 @@ export const Navbar = () => {
           to="/"
           sx={{ flexGrow: 0, mr: 4, textDecoration: 'none', color: 'inherit', fontWeight: 700 }}
         >
-           Mini Event Ticketing System
+           GoEvent
         </Typography>
 
         <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
