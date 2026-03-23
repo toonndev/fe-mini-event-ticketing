@@ -33,10 +33,7 @@ const schema = z
   .object({
     name: z.string().min(1, 'Required'),
     description: z.string().min(1, 'Required'),
-    date: z
-      .string()
-      .min(1, 'Required')
-      .refine((val) => new Date(val).getTime() > Date.now(), 'Event date must be in the future'),
+    date: z.string().min(1, 'Required'),
     endDate: z.string().optional(),
     venue: z.string().min(1, 'Required'),
     totalTickets: z
