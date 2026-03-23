@@ -28,7 +28,7 @@ export const Footer = () => {
             <Box display="flex" alignItems="center" gap={1} mb={1.5}>
               <ConfirmationNumberIcon sx={{ color: 'primary.light', fontSize: 22 }} />
               <Typography variant="subtitle1" fontWeight={700} color="white">
-                Mini Event Ticketing
+                GoEvent
               </Typography>
             </Box>
             <Typography variant="body2" sx={{ maxWidth: 280, lineHeight: 1.7 }}>
@@ -43,8 +43,8 @@ export const Footer = () => {
             </Typography>
             <Box display="flex" flexDirection="column" gap={1}>
               {[
-                { label: 'หน้าหลัก', to: '/' },
-                { label: 'ตั๋วของฉัน', to: '/dashboard' },
+                { label: 'Events', to: '/' },
+                { label: 'My Tickets', to: '/dashboard' },
               ].map(({ label, to }) => (
                 <MuiLink
                   key={to}

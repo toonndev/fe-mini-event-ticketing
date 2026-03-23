@@ -65,6 +65,7 @@ export const EventSlider = ({ events }: EventSliderProps) => {
               opacity: index === current ? 1 : 0,
               transition: 'opacity 0.7s ease',
               cursor: 'pointer',
+              pointerEvents: index === current ? 'auto' : 'none',
               backgroundImage: event.imageUrl
                 ? `url(${event.imageUrl})`
                 : PLACEHOLDER_GRADIENTS[index % PLACEHOLDER_GRADIENTS.length],
