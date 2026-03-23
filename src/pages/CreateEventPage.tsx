@@ -20,7 +20,10 @@ import { useAuth } from '../hooks/useAuth';
 const schema = z.object({
   name: z.string().min(1, 'Required'),
   description: z.string().min(1, 'Required'),
-  date: z.string().min(1, 'Required'),
+  date: z
+    .string()
+    .min(1, 'Required')
+    .refine((val) => new Date(val) > new Date(), 'Event date must be in the future'),
   venue: z.string().min(1, 'Required'),
   totalTickets: z
     .number({ invalid_type_error: 'Must be a number' })
@@ -106,6 +109,7 @@ export const CreateEventPage = () => {
             margin="normal"
             disabled={!isAdmin}
             InputLabelProps={{ shrink: true }}
+            inputProps={{ min: new Date().toISOString().slice(0, 16) }}
             error={!!errors.date}
             helperText={errors.date?.message}
             {...register('date')}
