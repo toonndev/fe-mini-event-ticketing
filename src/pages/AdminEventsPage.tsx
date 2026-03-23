@@ -10,6 +10,7 @@ import {
   TableRow,
   TableCell,
   TableContainer,
+  TablePagination,
   Paper,
   Chip,
   IconButton,
@@ -28,7 +29,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PublishIcon from '@mui/icons-material/Publish';
 import AddIcon from '@mui/icons-material/Add';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../hooks/useEvents';
 import { updateEvent, deleteEvent } from '../api/eventApi';
@@ -43,6 +44,8 @@ const STATUS_TABS: { label: string; value: TabValue }[] = [
   { label: 'Cancelled', value: 'cancelled' },
 ];
 
+const ROWS_PER_PAGE_OPTIONS = [10, 25, 50];
+
 const statusColor = (status: EventStatus): 'warning' | 'success' | 'error' | 'default' => {
   if (status === 'published') return 'success';
   if (status === 'draft') return 'warning';
@@ -52,26 +55,32 @@ const statusColor = (status: EventStatus): 'warning' | 'success' | 'error' | 'de
 
 export const AdminEventsPage = () => {
   const navigate = useNavigate();
-  const { events, loading, refetch } = useEvents();
   const [tab, setTab] = useState<TabValue>('all');
+  const [page, setPage] = useState(0); // MUI TablePagination is 0-indexed
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [deleteTarget, setDeleteTarget] = useState<Event | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [publishing, setPublishing] = useState<string | null>(null);
 
-  const counts = useMemo(
-    () => ({
-      all: events.length,
-      draft: events.filter((e) => e.status === 'draft').length,
-      published: events.filter((e) => e.status === 'published').length,
-      cancelled: events.filter((e) => e.status === 'cancelled').length,
-    }),
-    [events],
-  );
+  const { events, pagination, loading, refetch } = useEvents({
+    page: page + 1, // BE is 1-indexed
+    limit: rowsPerPage,
+    status: tab !== 'all' ? tab : undefined,
+  });
 
-  const filtered = useMemo(
-    () => (tab === 'all' ? events : events.filter((e) => e.status === tab)),
-    [events, tab],
-  );
+  const handleTabChange = (_: React.SyntheticEvent, v: TabValue) => {
+    setTab(v);
+    setPage(0);
+  };
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(e.target.value, 10));
+    setPage(0);
+  };
 
   const handlePublish = async (event: Event) => {
     setPublishing(event.id);
@@ -89,7 +98,9 @@ export const AdminEventsPage = () => {
     try {
       await deleteEvent(deleteTarget.id);
       setDeleteTarget(null);
-      await refetch();
+      // ถ้าลบ item สุดท้ายในหน้านี้ ให้ถอยหน้า
+      if (events.length === 1 && page > 0) setPage((p) => p - 1);
+      else await refetch();
     } finally {
       setDeleting(false);
     }
@@ -105,7 +116,7 @@ export const AdminEventsPage = () => {
           </Typography>
           {!loading && (
             <Typography variant="body2" color="text.secondary">
-              {events.length} events ทั้งหมด
+              {pagination.total} events{tab !== 'all' ? ` (${tab})` : ' ทั้งหมด'}
             </Typography>
           )}
         </Box>
@@ -122,13 +133,13 @@ export const AdminEventsPage = () => {
       <Paper variant="outlined">
         <Tabs
           value={tab}
-          onChange={(_, v: TabValue) => setTab(v)}
+          onChange={handleTabChange}
           sx={{ px: 2, borderBottom: 1, borderColor: 'divider' }}
         >
           {STATUS_TABS.map(({ label, value }) => (
             <Tab
               key={value}
-              label={`${label} (${counts[value]})`}
+              label={tab === value && !loading ? `${label} (${pagination.total})` : label}
               value={value}
             />
           ))}
@@ -148,7 +159,7 @@ export const AdminEventsPage = () => {
             </TableHead>
             <TableBody>
               {loading ? (
-                [...new Array(4)].map((_, i) => (
+                [...new Array(rowsPerPage > 5 ? 5 : rowsPerPage)].map((_, i) => (
                   <TableRow key={i}>
                     {[...new Array(6)].map((__, j) => (
                       <TableCell key={j}>
@@ -157,7 +168,7 @@ export const AdminEventsPage = () => {
                     ))}
                   </TableRow>
                 ))
-              ) : filtered.length === 0 ? (
+              ) : events.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
                     <Typography variant="body2" color="text.secondary" py={4}>
@@ -166,7 +177,7 @@ export const AdminEventsPage = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((event) => {
+                events.map((event) => {
                   const isPast = new Date(event.date) < new Date();
                   return (
                     <TableRow key={event.id} hover>
@@ -303,6 +314,18 @@ export const AdminEventsPage = () => {
             </TableBody>
           </Table>
         </TableContainer>
+
+        <TablePagination
+          component="div"
+          count={pagination.total}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+          labelRowsPerPage="แถวต่อหน้า"
+          labelDisplayedRows={({ from, to, count }) => `${from}–${to} จาก ${count}`}
+        />
       </Paper>
 
       {/* Delete confirm dialog */}

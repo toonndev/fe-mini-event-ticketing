@@ -1,14 +1,22 @@
 import { Event, CreateEventPayload, UpdateEventPayload } from '../types';
 import axiosClient from './axiosClient';
 
-interface PaginatedResponse<T> {
+export interface PaginatedResponse<T> {
   data: T[];
   pagination: { total: number; page: number; limit: number; totalPages: number };
 }
 
-export const getEvents = async (): Promise<Event[]> => {
-  const { data } = await axiosClient.get<PaginatedResponse<Event>>('/events');
-  return data.data;
+export interface GetEventsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  status?: string;
+}
+
+export const getEvents = async (params?: GetEventsParams): Promise<PaginatedResponse<Event>> => {
+  const { data } = await axiosClient.get<PaginatedResponse<Event>>('/events', { params });
+  return data;
 };
 
 export const getEventById = async (id: string): Promise<Event> => {
