@@ -42,3 +42,11 @@ export interface CreateEventPayload {
   venue: string;
   totalTickets: number;
 }
+
+export interface UpdateEventPayload {
+  name?: string;
+  description?: string;
+  date?: string;
+  venue?: string;
+  totalTickets?: number;
+}

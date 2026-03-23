@@ -23,7 +23,11 @@ const schema = z.object({
   date: z
     .string()
     .min(1, 'Required')
-    .refine((val) => new Date(val) > new Date(), 'Event date must be in the future'),
+    .refine((val) => {
+      // datetime-local value has no timezone → treat as local time
+      const localDate = new Date(val + ':00');
+      return localDate.getTime() > Date.now();
+    }, 'Event date must be in the future'),
   venue: z.string().min(1, 'Required'),
   totalTickets: z
     .number({ invalid_type_error: 'Must be a number' })
@@ -109,7 +113,11 @@ export const CreateEventPage = () => {
             margin="normal"
             disabled={!isAdmin}
             InputLabelProps={{ shrink: true }}
-            inputProps={{ min: new Date().toISOString().slice(0, 16) }}
+            inputProps={{
+              min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+                .toISOString()
+                .slice(0, 16),
+            }}
             error={!!errors.date}
             helperText={errors.date?.message}
             {...register('date')}

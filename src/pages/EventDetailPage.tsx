@@ -13,24 +13,39 @@ import {
   Skeleton,
   Card,
   CardContent,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useEvent } from '../hooks/useEvents';
 import { useBookings } from '../hooks/useBookings';
 import { useEventLive } from '../hooks/useEventLive';
+import { useAuth } from '../hooks/useAuth';
 import { BookingForm } from '../components/bookings/BookingForm';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { TicketBadge } from '../components/events/TicketBadge';
+import { deleteEvent } from '../api/eventApi';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const { event, loading, error } = useEvent(id!);
   const { bookings, loading: bookingsLoading, refetch: refetchBookings } = useBookings();
   const liveData = useEventLive(id);
   const [snackOpen, setSnackOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const remainingTickets = liveData?.remainingTickets ?? event?.remainingTickets ?? 0;
   const ticketStatus = liveData?.status ?? event?.status ?? 'available';
@@ -51,6 +66,17 @@ export const EventDetailPage = () => {
   const handleBookingSuccess = () => {
     setSnackOpen(true);
     refetchBookings();
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteEvent(id!);
+      navigate('/');
+    } catch {
+      setDeleting(false);
+      setDeleteOpen(false);
+    }
   };
 
   if (error) return <Container sx={{ py: 4 }}><ErrorAlert message={error} /></Container>;
@@ -77,9 +103,30 @@ export const EventDetailPage = () => {
             </Box>
           ) : event ? (
             <>
-              <Box display="flex" alignItems="center" gap={2} mb={2}>
-                <Typography variant="h5">{event.name}</Typography>
+              <Box display="flex" alignItems="center" gap={2} mb={2} flexWrap="wrap">
+                <Typography variant="h5" sx={{ flex: 1 }}>{event.name}</Typography>
                 <TicketBadge status={ticketStatus} remainingTickets={remainingTickets} />
+                {isAdmin && (
+                  <Box display="flex" gap={1}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<EditIcon />}
+                      onClick={() => navigate(`/admin/events/${id}/edit`)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => setDeleteOpen(true)}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
+                )}
               </Box>
 
               <Typography variant="body1" color="text.secondary" mb={3}>
@@ -153,6 +200,23 @@ export const EventDetailPage = () => {
           ) : null}
         </Grid>
       </Grid>
+
+      <Dialog open={deleteOpen} onClose={() => !deleting && setDeleteOpen(false)}>
+        <DialogTitle>Delete event?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This will permanently delete &quot;{event?.name}&quot; and all its bookings.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteOpen(false)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button color="error" onClick={handleDelete} disabled={deleting}>
+            {deleting ? 'Deleting…' : 'Yes, delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackOpen}

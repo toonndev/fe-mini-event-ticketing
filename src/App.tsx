@@ -8,6 +8,7 @@ import { EventListPage } from './pages/EventListPage';
 import { EventDetailPage } from './pages/EventDetailPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { CreateEventPage } from './pages/CreateEventPage';
+import { EditEventPage } from './pages/EditEventPage';
 import { AdminUsersPage } from './pages/AdminUsersPage';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
 
         <Route element={<AdminRoute />}>
           <Route path="/admin/events/create" element={<CreateEventPage />} />
+          <Route path="/admin/events/:id/edit" element={<EditEventPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
         </Route>
 
