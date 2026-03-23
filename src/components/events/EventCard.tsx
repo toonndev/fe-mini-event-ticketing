@@ -10,9 +10,8 @@ import {
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { Event } from '../../types';
+import { Event, TicketStatus } from '../../types';
 import { TicketBadge } from './TicketBadge';
-import { useEventLive } from '../../hooks/useEventLive';
 
 const PLACEHOLDER_GRADIENTS = [
   'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -25,10 +24,10 @@ const PLACEHOLDER_GRADIENTS = [
 interface EventCardProps {
   event: Event;
   onClick: (id: string) => void;
+  liveData?: { remainingTickets: number; ticketStatus: TicketStatus } | null;
 }
 
-export const EventCard = ({ event, onClick }: EventCardProps) => {
-  const liveData = useEventLive(event.id);
+export const EventCard = ({ event, onClick, liveData }: EventCardProps) => {
   const remainingTickets = liveData?.remainingTickets ?? event.remainingTickets;
   const ticketStatus = liveData?.ticketStatus ?? event.ticketStatus;
   const soldPercent = ((event.totalTickets - remainingTickets) / event.totalTickets) * 100;

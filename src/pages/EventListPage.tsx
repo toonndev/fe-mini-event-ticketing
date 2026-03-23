@@ -13,6 +13,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState, useEffect } from 'react';
 import { useEvents, useFeaturedEvents } from '../hooks/useEvents';
+import { useGlobalLive } from '../hooks/useGlobalLive';
 import { useDebounce } from '../hooks/useDebounce';
 import { EventCard } from '../components/events/EventCard';
 import { EventCardSkeleton } from '../components/events/EventCardSkeleton';
@@ -61,6 +62,8 @@ export const EventListPage = () => {
     return [...upcoming].sort(() => Math.random() - 0.5).slice(0, 3);
   }, [featuredEvents]);
 
+  const liveMap = useGlobalLive();
+
   const isFiltering = debouncedSearch !== '' || category !== 'all';
 
   const now = new Date();
@@ -83,7 +86,7 @@ export const EventListPage = () => {
           <Grid container spacing={3}>
             {recommended.map((event) => (
               <Grid item xs={12} sm={6} md={4} key={event.id}>
-                <EventCard event={event} onClick={(id) => navigate(`/events/${id}`)} />
+                <EventCard event={event} onClick={(id) => navigate(`/events/${id}`)} liveData={liveMap.get(event.id)} />
               </Grid>
             ))}
           </Grid>
@@ -165,7 +168,7 @@ export const EventListPage = () => {
             )
           : upcomingEvents.map((event) => (
               <Grid item xs={12} sm={6} md={4} key={event.id}>
-                <EventCard event={event} onClick={(id) => navigate(`/events/${id}`)} />
+                <EventCard event={event} onClick={(id) => navigate(`/events/${id}`)} liveData={liveMap.get(event.id)} />
               </Grid>
             ))}
       </Grid>
@@ -196,7 +199,7 @@ export const EventListPage = () => {
           <Grid container spacing={3}>
             {pastEvents.map((event) => (
               <Grid item xs={12} sm={6} md={4} key={event.id}>
-                <EventCard event={event} onClick={(id) => navigate(`/events/${id}`)} />
+                <EventCard event={event} onClick={(id) => navigate(`/events/${id}`)} liveData={liveMap.get(event.id)} />
               </Grid>
             ))}
           </Grid>
