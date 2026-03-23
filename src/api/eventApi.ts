@@ -14,14 +14,17 @@ export interface GetEventsParams {
   status?: string;
 }
 
+const normalizeEvent = (e: Event): Event => ({ ...e, ticketPrice: Number(e.ticketPrice) });
+
 export const getEvents = async (params?: GetEventsParams): Promise<PaginatedResponse<Event>> => {
   const { data } = await axiosClient.get<PaginatedResponse<Event>>('/events', { params });
+  data.data = data.data.map(normalizeEvent);
   return data;
 };
 
 export const getEventById = async (id: string): Promise<Event> => {
   const { data } = await axiosClient.get<Event>(`/events/${id}`);
-  return data;
+  return normalizeEvent(data);
 };
 
 export const createEvent = async (payload: CreateEventPayload): Promise<Event> => {

@@ -201,8 +201,9 @@ export const EditEventPage = () => {
               <Controller
                 name="category"
                 control={control}
+                defaultValue={'' as any}
                 render={({ field }) => (
-                  <Select labelId="category-label" label="Category" {...field}>
+                  <Select labelId="category-label" label="Category" {...field} value={field.value ?? ''}>
                     {EVENT_CATEGORIES.map((cat) => (
                       <MenuItem key={cat} value={cat} sx={{ textTransform: 'capitalize' }}>
                         {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -294,8 +295,9 @@ export const EditEventPage = () => {
               <Controller
                 name="status"
                 control={control}
+                defaultValue={'' as any}
                 render={({ field }) => (
-                  <Select labelId="status-label" label="Status" {...field}>
+                  <Select labelId="status-label" label="Status" {...field} value={field.value ?? ''}>
                     {EVENT_STATUSES.map((s) => (
                       <MenuItem key={s} value={s} sx={{ textTransform: 'capitalize' }}>
                         {s.charAt(0).toUpperCase() + s.slice(1)}
