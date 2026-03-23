@@ -41,6 +41,7 @@ export const EventListPage = () => {
     limit: ITEMS_PER_PAGE,
     search: debouncedSearch || undefined,
     category: category !== 'all' ? category : undefined,
+    status: 'published',
   });
 
   // Featured events for slider + recommendations (separate lightweight fetch)

@@ -9,6 +9,7 @@ import {
   MenuItem,
   IconButton,
   Box,
+  Divider,
 } from '@mui/material';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
@@ -67,6 +68,7 @@ export const Navbar = () => {
               {user?.email}
             </Typography>
           </MenuItem>
+          <Divider />
           <MenuItem
             onClick={() => {
               setAnchorEl(null);
