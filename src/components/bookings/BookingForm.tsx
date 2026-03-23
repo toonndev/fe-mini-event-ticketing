@@ -18,6 +18,7 @@ interface BookingFormProps {
   eventId: string;
   remainingTickets: number;
   usedQuota: number;
+  isPast?: boolean;
   onSuccess: () => void;
 }
 
@@ -34,16 +35,17 @@ const buildSchema = (maxQty: number) =>
 
 type FormValues = { quantity: number };
 
-export const BookingForm = ({ eventId, remainingTickets, usedQuota, onSuccess }: BookingFormProps) => {
+export const BookingForm = ({ eventId, remainingTickets, usedQuota, isPast, onSuccess }: BookingFormProps) => {
   const [apiError, setApiError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const maxQty = Math.min(MAX_QUOTA - usedQuota, remainingTickets);
   const isSoldOut = remainingTickets === 0;
   const isQuotaReached = usedQuota >= MAX_QUOTA;
-  const isDisabled = isSoldOut || isQuotaReached;
+  const isDisabled = isPast || isSoldOut || isQuotaReached;
   let buttonLabel = 'Book now';
-  if (isSoldOut) buttonLabel = 'Sold out';
+  if (isPast) buttonLabel = 'Event ended';
+  else if (isSoldOut) buttonLabel = 'Sold out';
   else if (isQuotaReached) buttonLabel = 'Quota reached';
 
   const {
@@ -83,6 +85,12 @@ export const BookingForm = ({ eventId, remainingTickets, usedQuota, onSuccess }:
         <Typography variant="h6" gutterBottom>
           Book tickets
         </Typography>
+
+        {isPast && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            This event has already ended.
+          </Alert>
+        )}
 
         {apiError && (
           <Alert severity="error" sx={{ mb: 2 }}>

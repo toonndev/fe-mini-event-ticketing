@@ -22,15 +22,23 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
   const remainingTickets = liveData?.remainingTickets ?? event.remainingTickets;
   const ticketStatus = liveData?.status ?? event.status;
   const soldPercent = ((event.totalTickets - remainingTickets) / event.totalTickets) * 100;
+  const isPast = new Date(event.date) < new Date();
 
   return (
-    <Card>
-      <CardActionArea onClick={() => onClick(event.id)}>
+    <Card sx={{ opacity: isPast ? 0.6 : 1 }}>
+      <CardActionArea onClick={() => !isPast && onClick(event.id)} disabled={isPast}>
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-            <Typography variant="h6" sx={{ flex: 1, mr: 1 }}>
-              {event.name}
-            </Typography>
+            <Box display="flex" alignItems="center" gap={1} sx={{ flex: 1, mr: 1 }}>
+              <Typography variant="h6">
+                {event.name}
+              </Typography>
+              {isPast && (
+                <Typography variant="caption" color="text.disabled" sx={{ whiteSpace: 'nowrap' }}>
+                  (Ended)
+                </Typography>
+              )}
+            </Box>
             <TicketBadge status={ticketStatus} remainingTickets={remainingTickets} />
           </Box>
 

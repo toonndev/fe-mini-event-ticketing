@@ -42,6 +42,8 @@ export const EventDetailPage = () => {
     if (!bookingsLoading) setQuotaReady(true);
   }, [bookingsLoading]);
 
+  const isPast = event ? new Date(event.date) < new Date() : false;
+
   const soldPercent = event
     ? ((event.totalTickets - remainingTickets) / event.totalTickets) * 100
     : 0;
@@ -145,6 +147,7 @@ export const EventDetailPage = () => {
               eventId={event.id}
               remainingTickets={remainingTickets}
               usedQuota={usedQuota}
+              isPast={isPast}
               onSuccess={handleBookingSuccess}
             />
           ) : null}
