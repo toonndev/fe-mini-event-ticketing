@@ -26,6 +26,7 @@ export const AdminUsersPage = () => {
   const { user: currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'admin';
   const [users, setUsers] = useState<User[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -37,14 +38,15 @@ export const AdminUsersPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getUsers();
-      setUsers(data);
+      const result = await getUsers(page + 1, rowsPerPage);
+      setUsers(result.data);
+      setTotal(result.pagination.total);
     } catch {
       setError('Failed to load users');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, rowsPerPage]);
 
   useEffect(() => {
     fetchUsers();
@@ -99,7 +101,7 @@ export const AdminUsersPage = () => {
                     ))}
                   </TableRow>
                 ))
-              : users.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user) => (
+              : users.map((user) => (
                   <TableRow key={user.id} hover>
                     <TableCell>
                       <Typography variant="body2" fontWeight={500}>
@@ -137,7 +139,7 @@ export const AdminUsersPage = () => {
       </TableContainer>
       <TablePagination
         component="div"
-        count={users.length}
+        count={total}
         page={page}
         onPageChange={(_, newPage) => setPage(newPage)}
         rowsPerPage={rowsPerPage}

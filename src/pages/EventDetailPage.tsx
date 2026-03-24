@@ -58,6 +58,7 @@ export const EventDetailPage = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [buyers, setBuyers] = useState<EventBooking[]>([]);
+  const [buyersTotal, setBuyersTotal] = useState(0);
   const [buyersLoading, setBuyersLoading] = useState(false);
   const [buyersPage, setBuyersPage] = useState(0);
   const [buyersRowsPerPage, setBuyersRowsPerPage] = useState(10);
@@ -66,12 +67,13 @@ export const EventDetailPage = () => {
     if (!id || !isAdmin) return;
     setBuyersLoading(true);
     try {
-      const data = await getEventBookings(id);
-      setBuyers(data);
+      const result = await getEventBookings(id, buyersPage + 1, buyersRowsPerPage);
+      setBuyers(result.data);
+      setBuyersTotal(result.pagination.total);
     } finally {
       setBuyersLoading(false);
     }
-  }, [id, isAdmin]);
+  }, [id, isAdmin, buyersPage, buyersRowsPerPage]);
 
   useEffect(() => {
     fetchBuyers();
@@ -286,7 +288,7 @@ export const EventDetailPage = () => {
         <Box mt={5}>
           <Divider sx={{ mb: 3 }} />
           <Typography variant="h6" mb={2}>
-            Buyers ({buyers.reduce((sum, b) => sum + b.quantity, 0)} tickets sold)
+            Buyers ({buyersTotal} bookings)
           </Typography>
           <TableContainer component={Paper} variant="outlined">
             <Table>
@@ -317,32 +319,30 @@ export const EventDetailPage = () => {
                         </TableCell>
                       </TableRow>
                     )
-                  : buyers
-                      .slice(buyersPage * buyersRowsPerPage, buyersPage * buyersRowsPerPage + buyersRowsPerPage)
-                      .map((b) => (
-                        <TableRow key={b.bookingId} hover>
-                          <TableCell>{b.user.name}</TableCell>
-                          <TableCell>
-                            <Typography variant="body2" color="text.secondary">
-                              {b.user.email}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">{b.quantity}</TableCell>
-                          <TableCell>
-                            {new Date(b.bookedAt).toLocaleDateString('th-TH', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                            })}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                  : buyers.map((b) => (
+                      <TableRow key={b.bookingId} hover>
+                        <TableCell>{b.user.name}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {b.user.email}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">{b.quantity}</TableCell>
+                        <TableCell>
+                          {new Date(b.bookedAt).toLocaleDateString('th-TH', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
               </TableBody>
             </Table>
           </TableContainer>
           <TablePagination
             component="div"
-            count={buyers.length}
+            count={buyersTotal}
             page={buyersPage}
             onPageChange={(_, newPage) => setBuyersPage(newPage)}
             rowsPerPage={buyersRowsPerPage}
