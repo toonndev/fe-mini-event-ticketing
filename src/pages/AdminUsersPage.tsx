@@ -7,6 +7,7 @@ import {
   TableRow,
   TableCell,
   TableContainer,
+  TablePagination,
   Paper,
   Chip,
   Select,
@@ -29,6 +30,8 @@ export const AdminUsersPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [snackMessage, setSnackMessage] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -96,7 +99,7 @@ export const AdminUsersPage = () => {
                     ))}
                   </TableRow>
                 ))
-              : users.map((user) => (
+              : users.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user) => (
                   <TableRow key={user.id} hover>
                     <TableCell>
                       <Typography variant="body2" fontWeight={500}>
@@ -132,6 +135,20 @@ export const AdminUsersPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        component="div"
+        count={users.length}
+        page={page}
+        onPageChange={(_, newPage) => setPage(newPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(e) => {
+          setRowsPerPage(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
+        rowsPerPageOptions={[5, 10, 25]}
+        labelRowsPerPage="แถวต่อหน้า"
+        labelDisplayedRows={({ from, to, count }) => `${from}–${to} จาก ${count}`}
+      />
 
       <Snackbar
         open={!!snackMessage}

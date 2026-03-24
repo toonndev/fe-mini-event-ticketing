@@ -25,6 +25,7 @@ import {
   TableRow,
   TableCell,
   TableContainer,
+  TablePagination,
   Paper,
 } from '@mui/material';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -58,6 +59,8 @@ export const EventDetailPage = () => {
   const [deleting, setDeleting] = useState(false);
   const [buyers, setBuyers] = useState<EventBooking[]>([]);
   const [buyersLoading, setBuyersLoading] = useState(false);
+  const [buyersPage, setBuyersPage] = useState(0);
+  const [buyersRowsPerPage, setBuyersRowsPerPage] = useState(10);
 
   const fetchBuyers = useCallback(async () => {
     if (!id || !isAdmin) return;
@@ -314,27 +317,43 @@ export const EventDetailPage = () => {
                         </TableCell>
                       </TableRow>
                     )
-                  : buyers.map((b) => (
-                      <TableRow key={b.bookingId} hover>
-                        <TableCell>{b.user.name}</TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {b.user.email}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">{b.quantity}</TableCell>
-                        <TableCell>
-                          {new Date(b.bookedAt).toLocaleDateString('th-TH', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                  : buyers
+                      .slice(buyersPage * buyersRowsPerPage, buyersPage * buyersRowsPerPage + buyersRowsPerPage)
+                      .map((b) => (
+                        <TableRow key={b.bookingId} hover>
+                          <TableCell>{b.user.name}</TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              {b.user.email}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">{b.quantity}</TableCell>
+                          <TableCell>
+                            {new Date(b.bookedAt).toLocaleDateString('th-TH', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </TableCell>
+                        </TableRow>
+                      ))}
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            component="div"
+            count={buyers.length}
+            page={buyersPage}
+            onPageChange={(_, newPage) => setBuyersPage(newPage)}
+            rowsPerPage={buyersRowsPerPage}
+            onRowsPerPageChange={(e) => {
+              setBuyersRowsPerPage(parseInt(e.target.value, 10));
+              setBuyersPage(0);
+            }}
+            rowsPerPageOptions={[5, 10, 25]}
+            labelRowsPerPage="แถวต่อหน้า"
+            labelDisplayedRows={({ from, to, count }) => `${from}–${to} จาก ${count}`}
+          />
         </Box>
       )}
 
